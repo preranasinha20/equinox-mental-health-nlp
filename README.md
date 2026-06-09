@@ -1,22 +1,39 @@
-## 🧘‍♂️ **Equinox – AI-Powered Health & Wellness Analyzer**
+**Equinox – AI-Powered Health & Wellness Analyzer**
 
-> *“Balancing minds, one insight at a time.”*
+*“Balancing minds, one insight at a time.”*
 
 ---
 
-### 🌍 **Overview**
+### **Overview**
 
-**Equinox** is an AI-driven web application that analyzes social media text (Reddit posts) to generate **emotional insights, personality profiles, and wellness indicators**.
-It visualizes trends like **mood evolution, aura clusters, and emotion distributions** using cutting-edge NLP models such as **Sentence-BERT**, **DistilRoBERTa**, and **VADER**.
+Equinox is a clinical mental health intelligence platform that analyses a user's Reddit post history to generate emotional profiles, personality insights, and risk indicators — accessible through both a patient dashboard and a therapist interface.
 
-The platform offers:
 
-* 🌈 **Aura detection** (emotional clustering via K-Means)
-* 📈 **Mood & emotion visualization** dashboards
-* 🧠 **Personality insights** using the **Big Five (OCEAN)** model
-* 💬 **Therapist dashboard** for patient search & analysis
-* ❤️ **Mental-health risk warnings** (depression, anxiety, PTSD, schizophrenia)
+### **Concept**
+Mental health professionals currently have no passive insight into patient emotional states between sessions. Equinox bridges this gap by analysing publicly available social media language patterns to provide therapists with continuous, non-intrusive emotional monitoring.
+The Aura system — the core innovation — generates a Spotify-style emotional fingerprint from a user's posting history. Just as Spotify analyses listening patterns to assign an audio aura, Equinox analyses language patterns to assign an emotional one.
 
+
+### **Features**
+
+**Patient View**
+
+Aura — personalised emotional colour profile (Calm Green, Tranquil Blue, Radiant Orange, Stormy Gray, Blossom Pink, Bright Yellow)
+Mood Trend over last 60 days (daily sentiment average)
+Weekly Emotion Distribution radar chart (7 emotions)
+
+**Insights View**
+
+BERT-based Trend Evolution Graph tracking emotion intensity over time
+Big Five Personality Insights (Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism)
+Clinical Risk Indicators — Depression, Anxiety, PTSD, Schizophrenia, Suicidal risk (heuristic, non-diagnostic)
+Session Insights with therapist guidance suggestions
+
+**Therapist Dashboard**
+
+Search patients by Reddit username
+View dominant emotion and post history summary
+Session preparation insights per patient
 ---
 
 ### 🧩 **Architecture Overview**
@@ -50,16 +67,20 @@ The platform offers:
 ```
 
 ---
+**Data Pipeline**
+**Scrapes 7 subreddits:** mentalhealth, selfimprovement, college, happiness, Anxiety, Depression, relationships
+**Four feed types per subreddit:** top, hot, new, rising — for a rich longitudinal dataset rather than just recent activity.
 
-### ⚙️ **Installation & Setup**
 
-#### 🧾 Prerequisites
+### **Installation & Setup**
+
+#### Prerequisites
 
 * Python ≥ 3.10
 * pip (latest version)
 * Reddit API credentials
 
-#### 🪜 Steps
+### Steps
 
 ```bash
 # 1️⃣ Clone the repository
@@ -81,7 +102,7 @@ Then open → **[http://127.0.0.1:5000](http://127.0.0.1:5000)**
 
 ---
 
-### 💡 **Core Workflow**
+**Core Workflow**
 
 | Stage                        | Description                                     | Tools / Models                   |
 | ---------------------------- | ----------------------------------------------- | -------------------------------- |
@@ -96,7 +117,7 @@ Then open → **[http://127.0.0.1:5000](http://127.0.0.1:5000)**
 
 ---
 
-### 🧠 **Models Used**
+**Models Used**
 
 | Model                | Type                | Purpose                                 |
 | -------------------- | ------------------- | --------------------------------------- |
@@ -109,7 +130,7 @@ Then open → **[http://127.0.0.1:5000](http://127.0.0.1:5000)**
 
 ---
 
-### 🧩 **Folder Structure**
+**Folder Structure**
 
 ```
 equinox/
@@ -133,7 +154,7 @@ equinox/
 
 ---
 
-### 📊 **Example Visualizations**
+### **Visualizations**
 
 * **Mood Trend Graph:** Average VADER sentiment per day
 * **Emotion Radar:** Weekly emotion distribution from BERT
@@ -142,7 +163,7 @@ equinox/
 
 ---
 
-### 🔐 **Reddit API Credentials**
+### **Reddit API Credentials**
 
 Create a Reddit app at [https://www.reddit.com/prefs/apps](https://www.reddit.com/prefs/apps)
 and update `app.py`:
@@ -155,19 +176,22 @@ REDDIT_USER_AGENT = "Equinox-App-by-Om-Bansal"
 
 ---
 
-### 🚀 **Future Enhancements**
+**Known Limitations**
 
-* Integrate real-time emotion updates
-* Expand to Twitter/Instagram data
-* Add multi-language support
-* Deploy on Azure App Service / AWS EC2
+Minimum 10–15 posts recommended for reliable aura classification and mood trend analysis
+Clinical risk indicators are heuristic and non-diagnostic — not a substitute for professional assessment
+Model performance on non-English or code-switched text is untested
+Reddit posts reflect public expression, not necessarily private emotional states
 
----
+**Future Scope**
 
-### 👤 **Author**
+Fine-tune emotion model on mental health-specific Reddit corpora
+Replace heuristic Big Five mapping with a trained personality classifier
+Longitudinal deterioration detection — flag users whose emotional trajectory worsens over weeks
+Therapist note integration for session continuity
 
-**Om Bansal**
-📧 [[ombansal2109@gmail.com](mailto:ombansal2109@gmail.com)]
-💼 [LinkedIn](https://linkedin.com/in/om~bansal/) | [GitHub](https://github.com/ombansal1)
+**Contributors**
 
----
+Prerana Sinha
+Om Bansal
+Pavan Bhapkar
