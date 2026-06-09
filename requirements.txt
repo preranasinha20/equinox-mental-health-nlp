@@ -1,0 +1,30 @@
+# --- Web app ---
+Flask==3.0.3
+
+# --- Reddit API ---
+praw==7.7.1
+
+# --- Data & utilities ---
+pandas==2.2.2
+numpy==1.26.4
+
+# --- Sentiment (VADER) ---
+vaderSentiment==3.3.2
+
+# --- ML / NLP stack ---
+scikit-learn==1.4.2
+scipy==1.11.4
+
+# Sentence embeddings (SBERT) + Transformers
+sentence-transformers==2.6.1
+transformers==4.40.2
+# NOTE: torch wheel is platform-specific; this CPU build works broadly.
+# If you have CUDA/MPS, install the matching wheel per pytorch.org.
+torch==2.2.2
+
+# (Pulled by transformers but pinned for stability)
+huggingface-hub==0.23.2
+tokenizers==0.15.2
+
+# --- Optional: prod server (use when deploying on Linux) ---
+# gunicorn==21.2.0

@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Equinox — Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <!-- Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+
+  <style>
+    :root{
+      --bg:#b99794;              /* muted rose */
+      --teal:#5b7b7a;            /* desaturated teal */
+      --card:#000000;            /* card background */
+      --shadow: 0 14px 28px rgba(0,0,0,.25), 0 10px 10px rgba(0,0,0,.22);
+      --radius: 26px;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--teal);
+      font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    }
+
+    .wrap{
+      max-width:1280px;
+      margin:0 auto;
+      padding:40px 20px 64px;
+    }
+
+    /* Heading */
+    .title{
+      text-align:center;
+      font-size: clamp(28px, 5vw, 56px);
+      font-weight:800;
+      letter-spacing:.5px;
+      margin:8px 0 28px;
+    }
+
+    /* 3-card row */
+    .grid{
+      display:flex;
+      gap:28px;
+      align-items:stretch;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .card{
+      background:var(--card);
+      color:var(--teal);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:22px;
+      flex:1 1 360px;
+      min-height:520px;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+    .card h3{
+      margin:4px 6px 16px;
+      font-size:clamp(18px,2.4vw,26px);
+      font-weight:700;
+      color:var(--teal);
+    }
+
+    /* Aura card specifics */
+    .aura-gradient{
+      border-radius:18px;
+      height:66%;
+      min-height:260px;
+      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.3));
+      outline:1px solid rgba(255,255,255,.04);
+    }
+    .aura-name{
+      margin:16px 6px 6px;
+      font-size:clamp(18px,2.2vw,24px);
+      font-weight:700;
+      color:var(--teal);
+    }
+    .aura-desc{
+      margin:2px 6px 0;
+      font-size:clamp(14px,1.6vw,16px);
+      line-height:1.55;
+      color:var(--teal);
+      opacity:.95;
+    }
+
+    /* canvases */
+    .canvas-wrap{
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:8px;
+      height:360px;
+    }
+    canvas{
+      width:100% !important;
+      height:100% !important;
+    }
+
+    .muted-note{
+      color:rgba(255,255,255,0.6);
+      font-size:14px;
+      margin:6px 8px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="title">Welcome, {{ username }}!</div>
+
+    <section class="grid">
+      <!-- AURA CARD -->
+      <article class="card" id="auraCard">
+        <h3 id="auraHeading">Aura</h3>
+        <div class="aura-gradient" id="auraGradient"></div>
+        <div class="aura-name" id="auraName">Loading…</div>
+        <p class="aura-desc" id="auraDesc">{{ aura_description if aura_description else "" }}</p>
+      </article>
+
+      <!-- VADER LINE -->
+      <article class="card">
+        <h3>Mood Trend (Last 60 Days)</h3>
+        <div class="canvas-wrap">
+          <canvas id="moodLine"></canvas>
+        </div>
+        <div class="muted-note" id="trendNote"></div>
+      </article>
+
+      <!-- RADAR -->
+      <article class="card">
+        <h3>Weekly Emotion Distribution</h3>
+        <div class="canvas-wrap">
+          <canvas id="emotionRadar"></canvas>
+        </div>
+        <div class="muted-note" id="radarNote"></div>
+      </article>
+    </section>
+  </div>
+
+  <script>
+    const TEAL = '#5b7b7a';
+    const TEAL_FILL = 'rgba(91,123,122,0.30)';
+    const username = `{{ username|e }}`;
+
+    /* Aura */
+    (async () => {
+      try{
+        const res = await fetch(`/api/aura/${encodeURIComponent(username)}`);
+        const data = await res.json();
+
+        const rawName = data?.aura || data?.name || 'Unknown';
+        const desc = data?.description || '{{ aura_description|e }}' || '';
+
+        document.getElementById('auraName').textContent = rawName;
+        document.getElementById('auraDesc').textContent = desc || 'Not enough data to determine aura.';
+
+        const key = rawName.toLowerCase();
+        const g = document.getElementById('auraGradient');
+        const gradients = {
+          green : 'linear-gradient(180deg,#4fb39b,#0c3b33)',
+          orange: 'linear-gradient(180deg,#ffad7b,#3a1712)',
+          blue  : 'linear-gradient(180deg,#59c2d4,#0b2a33)',
+          gray  : 'linear-gradient(180deg,#9aa0a6,#1b1b1c)',
+          grey  : 'linear-gradient(180deg,#9aa0a6,#1b1b1c)',
+          pink  : 'linear-gradient(180deg,#f2a6c6,#3b1d36)',
+          yellow: 'linear-gradient(180deg,#ffd977,#3b2a10)',
+          default: 'linear-gradient(180deg,#b99794,#2a1f1e)'
+        };
+        let chosen = gradients.default;
+        for (const k of ['green','orange','blue','gray','grey','pink','yellow']){
+          if(key.includes(k)){ chosen = gradients[k]; break; }
+        }
+        g.style.background = chosen;
+      }catch(e){
+        console.warn('Aura fetch failed', e);
+        document.getElementById('auraName').textContent = 'Aura';
+        document.getElementById('auraDesc').textContent = 'Error fetching aura.';
+      }
+    })();
+
+    /* Fetch helper */
+    async function ensureFetched() {
+      try{
+        const r = await fetch(`/api/fetch/${encodeURIComponent(username)}`);
+        const js = await r.json().catch(()=> ({}));
+        return js?.fetched ?? null;
+      }catch{ return null; }
+    }
+
+    /* Mood trend */
+    (async () => {
+      const fetchedCount = await ensureFetched();
+      if (fetchedCount === 0)
+        document.getElementById('trendNote').textContent = 'No posts fetched yet.';
+
+      try{
+        const r = await fetch(`/api/mood_trend/${encodeURIComponent(username)}?days=60`);
+        const js = await r.json();
+        const trend = js?.trend || [];
+
+        const labels = trend.map(d => d.date);
+        const values = trend.map(d => d.avg_compound);
+
+        const ctx = document.getElementById('moodLine');
+        new Chart(ctx, {
+          type: 'line',
+          data:{
+            labels,
+            datasets:[{
+              label:'Mood Sentiment (Daily Avg)',
+              data: values,
+              borderColor: TEAL,
+              backgroundColor: 'rgba(91,123,122,0.18)',
+              pointRadius: 2.5,
+              pointBackgroundColor: TEAL,
+              tension: 0.25,
+              fill: true
+            }]
+          },
+          options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            scales:{
+              x:{ ticks:{ color:TEAL } , grid:{ color:'rgba(255,255,255,0.08)'} },
+              y:{ min:-1, max:1, ticks:{ color:TEAL }, grid:{ color:'rgba(255,255,255,0.08)'} }
+            },
+            plugins:{ legend:{ labels:{ color:TEAL } } }
+          }
+        });
+
+        if (!trend.length)
+          document.getElementById('trendNote').textContent = 'No sentiment data available.';
+      }catch(e){
+        console.warn('Trend fetch failed', e);
+        document.getElementById('trendNote').textContent = 'Error loading trend.';
+      }
+    })();
+
+    /* Radar */
+    (async () => {
+      try{
+        const r = await fetch(`/api/emotions/${encodeURIComponent(username)}`);
+        const js = await r.json() || {};
+
+        const labels = Object.keys(js);
+        const values = Object.values(js);
+
+        const ctx = document.getElementById('emotionRadar');
+        new Chart(ctx, {
+          type:'radar',
+          data:{
+            labels,
+            datasets:[{
+              label:'Weekly Emotion Intensity',
+              data: values,
+              borderColor: TEAL,
+              backgroundColor: TEAL_FILL,
+              pointBackgroundColor: TEAL,
+              borderWidth: 2
+            }]
+          },
+          options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            scales:{
+              r:{
+                grid:{ color:'rgba(255,255,255,0.10)' },
+                angleLines:{ color:'rgba(255,255,255,0.10)' },
+                pointLabels:{ color:TEAL },
+                suggestedMin:0, suggestedMax:1,
+                ticks:{ display:false }
+              }
+            },
+            plugins:{ legend:{ labels:{ color:TEAL } } }
+          }
+        });
+
+        if (!labels.length)
+          document.getElementById('radarNote').textContent = 'No emotion data available.';
+      }catch(e){
+        console.warn('Emotion fetch failed', e);
+        document.getElementById('radarNote').textContent = 'Error loading emotions.';
+      }
+    })();
+  </script>
+</body>
+</html>

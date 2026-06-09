@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Insights · Equinox</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
+      --bg:#b99794;             /* muted rose */
+      --ink:#5b7b7a;            /* desaturated teal */
+      --card:#000;              /* card background */
+      --teal:#5b7b7a;           /* headings & accents */
+      --shadow:0 4px 12px rgba(0,0,0,.2);
+      --radius:25px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; padding:24px;
+      background:var(--bg); color:var(--ink);
+      font-family:'Poppins',sans-serif;
+    }
+
+    /* Page heading */
+    .page-title{
+      font-size:2.8rem; font-weight:700; text-align:center;
+      color:var(--teal); margin:6px 0 22px 0;
+      letter-spacing:.3px;
+    }
+
+    /* 3-column flexible layout */
+    .shell{
+      display:flex; gap:24px; align-items:flex-start; justify-content:stretch;
+    }
+    .col{display:flex; flex-direction:column; gap:18px; flex:1 1 0}
+    .col--left{max-width:360px}
+    .col--right{flex:1.1}
+
+    /* Cards */
+    .card{
+      background:var(--card); color:#cfe3df;
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px 20px;
+    }
+    .card h3{
+      margin:0 0 10px 0; color:var(--teal); font-weight:700;
+    }
+    .subtle{
+      color:#9fb8b6; font-style:italic; font-weight:400; font-size:.95rem;
+    }
+    .chip{
+      display:inline-block; padding:6px 12px; border-radius:999px;
+      background:rgba(255,255,255,.08); color:#dbe7e6; font-size:.8rem;
+      margin-bottom:10px;
+    }
+
+    /* Aura block */
+    .aura-wrap{
+      border-radius:calc(var(--radius) - 5px);
+      padding:18px;
+      box-shadow:0 6px 18px rgba(0,0,0,.25) inset;
+      color:#eaf6f4;
+    }
+    .aura-name{font-weight:700; font-size:1.2rem}
+    .aura-desc{color:#a7d0cc; margin-top:6px; line-height:1.45}
+
+    /* Generic content blocks / lists */
+    .block{
+      background:#0d0d0d; border:1px solid #222; color:#d8e6e4;
+      border-radius:18px; padding:12px 14px;
+    }
+    ul.clean{margin:0; padding-left:18px}
+    ul.clean li{margin:6px 0}
+
+    /* Warnings color-code */
+    .risk-list{list-style:none; padding:0; margin:0}
+    .risk-item{
+      display:flex; justify-content:space-between; align-items:center;
+      background:#0d0d0d; border:1px solid #222; border-radius:14px;
+      padding:8px 12px; margin:8px 0; color:#e5eeee;
+    }
+    .risk-pill{
+      padding:4px 10px; border-radius:999px; font-size:.8rem; font-weight:600;
+      color:#0b0b0b;
+    }
+    .risk-low{background:#7ee2a4}       /* green */
+    .risk-moderate{background:#ffd86b}  /* yellow */
+    .risk-high{background:#ff7a7a}      /* red */
+
+    /* Chart canvas */
+    canvas{width:100%!important; height:320px!important; background:#0b0b0b; border-radius:16px; padding:8px}
+
+    /* Personality pills (like your screenshot) */
+    .traits-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .trait{
+      background:#0d0d0d;border:1px solid #222;border-radius:14px;
+      padding:10px 12px;color:#d8e6e4;display:flex;align-items:center;gap:10px
+    }
+    .trait-label{flex:0 0 auto;min-width:150px;color:#9fb8b6;font-weight:600}
+    .meter{flex:1;height:10px;background:#151515;border-radius:999px;position:relative;overflow:hidden}
+    .meter>span{position:absolute;inset:0 auto 0 0;width:0%;background:#5b7b7a;border-radius:999px}
+    .trait-val{flex:0 0 auto;font-weight:700;color:#cfe3df}
+
+    /* Responsive */
+    @media (max-width:1100px){
+      .shell{flex-direction:column}
+      .col--left{max-width:none}
+    }
+    @media (max-width:700px){
+      .traits-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-title">Insights</div>
+
+  <div class="shell">
+    <!-- LEFT COLUMN: Aura + quick insight -->
+    <div class="col col--left">
+      <div class="card">
+        <div class="chip">User aura</div>
+
+        <!-- Gradient uses optional aura.gradient_start / aura.gradient_end -->
+        <div class="aura-wrap"
+             style="
+               background:linear-gradient(135deg,
+                 {{ aura.gradient_start|default('#5b7b7a') }},
+                 {{ aura.gradient_end|default('#000000') }});
+             ">
+          <div class="aura-name">{{ aura.aura }}</div>
+          <div class="aura-desc">{{ aura.description }}</div>
+        </div>
+
+        <div class="subtle" style="margin-top:10px">Generated aura insight</div>
+        <div class="block">{{ quick_insight }}</div>
+
+        <div class="subtle" style="margin-top:12px">Summary of trends</div>
+        <div class="block">{{ trend_summary }}</div>
+      </div>
+    </div>
+
+    <!-- MIDDLE COLUMN: Trend graph + session insights -->
+    <div class="col">
+      <div class="card">
+        <h3>Trend Evolution Graph (BERT)</h3>
+        <canvas id="bertTrend"></canvas>
+      </div>
+
+      <div class="card">
+        <h3>Session Insights</h3>
+        {% if session_tips %}
+          <ul class="clean">
+            {% for tip in session_tips %}
+              <li>{{ tip }}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="block">{{ quick_insight }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: Personality + Warnings -->
+    <div class="col col--right">
+      <div class="card">
+        <!-- PERSONA PILLS -->
+        <h3>Personality Insights</h3>
+        <div class="traits-grid">
+          <div class="trait">
+            <div class="trait-label">Openness</div>
+            <div class="meter"><span style="width: {{ big5.openness }}%;"></span></div>
+            <div class="trait-val">{{ big5.openness }}</div>
+          </div>
+
+          <div class="trait">
+            <div class="trait-label">Conscientiousness</div>
+            <div class="meter"><span style="width: {{ big5.conscientiousness }}%;"></span></div>
+            <div class="trait-val">{{ big5.conscientiousness }}</div>
+          </div>
+
+          <div class="trait">
+            <div class="trait-label">Extraversion</div>
+            <div class="meter"><span style="width: {{ big5.extraversion }}%;"></span></div>
+            <div class="trait-val">{{ big5.extraversion }}</div>
+          </div>
+
+          <div class="trait">
+            <div class="trait-label">Agreeableness</div>
+            <div class="meter"><span style="width: {{ big5.agreeableness }}%;"></span></div>
+            <div class="trait-val">{{ big5.agreeableness }}</div>
+          </div>
+
+          <div class="trait">
+            <div class="trait-label">Neuroticism</div>
+            <div class="meter"><span style="width: {{ big5.neuroticism }}%;"></span></div>
+            <div class="trait-val">{{ big5.neuroticism }}</div>
+          </div>
+        </div>
+
+        <!-- WARNINGS -->
+        <h3 style="margin-top:16px;">Warnings</h3>
+        <div class="block">
+          <ul class="risk-list">
+            <li class="risk-item">
+              <span>Depression</span>
+              <span class="risk-pill
+                {% if risks.depression|lower == 'high' %}risk-high{% elif risks.depression|lower == 'moderate' %}risk-moderate{% else %}risk-low{% endif %}">
+                {{ risks.depression }}
+              </span>
+            </li>
+            <li class="risk-item">
+              <span>Anxiety</span>
+              <span class="risk-pill
+                {% if risks.anxiety|lower == 'high' %}risk-high{% elif risks.anxiety|lower == 'moderate' %}risk-moderate{% else %}risk-low{% endif %}">
+                {{ risks.anxiety }}
+              </span>
+            </li>
+            <li class="risk-item">
+              <span>PTSD</span>
+              <span class="risk-pill
+                {% if risks.ptsd|lower == 'high' %}risk-high{% elif risks.ptsd|lower == 'moderate' %}risk-moderate{% else %}risk-low{% endif %}">
+                {{ risks.ptsd }}
+              </span>
+            </li>
+            <li class="risk-item">
+              <span>Schizophrenia</span>
+              <span class="risk-pill
+                {% if risks.schizophrenia|lower == 'high' %}risk-high{% elif risks.schizophrenia|lower == 'moderate' %}risk-moderate{% else %}risk-low{% endif %}">
+                {{ risks.schizophrenia }}
+              </span>
+            </li>
+            <li class="risk-item">
+              <span>Suicidal risk</span>
+              <span class="risk-pill
+                {% if risks.suicidal|lower == 'high' %}risk-high{% elif risks.suicidal|lower == 'moderate' %}risk-moderate{% else %}risk-low{% endif %}">
+                {{ risks.suicidal }}
+              </span>
+            </li>
+          </ul>
+          <div class="subtle" style="display:block; margin-top:10px">
+            These indicators are heuristic (non-diagnostic). Use clinically with caution.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Minimal JS: render stacked/filled line chart with your series -->
+  <script>
+    const labels = {{ trend_labels|tojson }};
+    const series = {{ trend_series|tojson }};
+
+    // Optional exponent boost to emphasize minority emotions while keeping stacks normalized
+    const GAMMA = 0.6;
+    function boostAndNormalize(s, gamma=1){
+      const keys = Object.keys(s || {});
+      const n = keys.length ? (s[keys[0]]?.length || 0) : 0;
+      const out = {}; keys.forEach(k => out[k] = new Array(n).fill(0));
+      for (let i=0;i<n;i++){
+        const col = keys.map(k => Math.max(0, Number(s[k][i] || 0)));
+        const boosted = col.map(v => Math.pow(v, gamma));
+        const sum = boosted.reduce((a,b)=>a+b,0) || 1;
+        keys.forEach((k, idx)=> out[k][i] = +(boosted[idx]/sum).toFixed(4));
+      }
+      return out;
+    }
+    const boosted = boostAndNormalize(series, GAMMA);
+
+    // Palette with teal-forward accents on dark background
+    const palette = ["#6dd3c1","#8aa9ff","#ffb14d","#ff799a","#93e85b","#ffd86b","#c289ff","#7ad3ff"];
+
+    const datasets = Object.keys(boosted).map((k,i)=>({
+      label:k,
+      data:boosted[k],
+      borderColor:palette[i%palette.length],
+      backgroundColor:palette[i%palette.length] + "44",
+      fill:true,
+      tension:0.28,
+      pointRadius:0
+    }));
+
+    new Chart(document.getElementById('bertTrend'),{
+      type:'line',
+      data:{labels,datasets},
+      options:{
+        responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
+        plugins:{
+          legend:{labels:{color:'#d8e6e4', font:{family:'Poppins'}}},
+          tooltip:{backgroundColor:'rgba(0,0,0,.8)', titleColor:'#eaf6f4', bodyColor:'#eaf6f4'}
+        },
+        scales:{
+          x:{stacked:true, ticks:{color:'#a2c2bf', font:{family:'Poppins'}}, grid:{color:'#1f1f1f'}},
+          y:{stacked:true, suggestedMin:0, suggestedMax:1, ticks:{color:'#a2c2bf', font:{family:'Poppins'}}, grid:{color:'#1f1f1f'}}
+        }
+      }
+    });
+  </script>
+</body>
+</html>

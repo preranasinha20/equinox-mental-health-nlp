@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Equinox – Login</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root {
+      --bg: #c7a39f;    /* dusty rose */
+      --blue: #4b4f97;  /* EQUINOX wordmark */
+      --teal: #5a7875;  /* labels / admin link / input */
+      --shadow: #0c0c0c;
+      --input: #5a7875;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      color: var(--teal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* don't clip the right edge of the wordmark */
+      overflow-x: visible;
+      overflow-y: hidden;
+    }
+
+    .wrapper {
+      width: 92vw;
+      max-width: 1400px;
+      padding: 24px 72px 0 72px; /* right padding so title doesn't crowd admin link */
+      position: relative;
+    }
+
+    /* ADMIN LOGIN: fixed so it never collides with content */
+    .admin-link {
+      position: fixed;
+      top: 26px;
+      right: 28px;
+      z-index: 10;
+      text-decoration: none;
+      color: var(--teal);
+      font-weight: 800;
+      font-size: clamp(16px, 1.6vw, 22px);
+      letter-spacing: 1px;
+    }
+
+    /* Branding row */
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      justify-content: center;         /* center the whole group */
+    }
+
+    .brand img {
+      width: clamp(200px, 13vw, 500px);
+      height: auto;
+      flex-shrink: 0;
+    }
+
+    .brand-text {
+      line-height: 1;
+    }
+
+    .brand-text h1 {
+      margin: 0;
+      color: var(--blue);
+      font-weight: 900;
+      letter-spacing: 4px;
+      /* responsive: won’t overflow or get clipped */
+      font-size: clamp(88px, 10.5vw, 160px);
+    }
+
+    .brand-text p {
+      margin: 10px 0 0 2px;
+      color: var(--teal);
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      font-weight: 800;
+      font-size: clamp(16px, 1.8vw, 22px);
+      text-align: left;
+    }
+
+    /* Login input block */
+    .login-container {
+      margin-top: clamp(36px, 6vh, 70px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .login-container input {
+      width: clamp(320px, 42vw, 520px);
+      height: clamp(50px, 8vh, 64px);
+      border: none;
+      border-radius: 22px;
+      background: var(--input);
+      color: #e6f0ef;
+      font-size: clamp(18px, 2.2vw, 22px);
+      font-weight: 800;
+      text-align: center;
+      outline: none;
+      box-shadow: 12px 10px 0 var(--shadow);  /* offset shadow like your mock */
+    }
+
+    .login-container input::placeholder {
+      color: #e6f0ef;
+      opacity: 0.85;
+    }
+
+    .label {
+      margin-top: 14px;
+      font-size: clamp(18px, 3vw, 28px);
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--teal);
+    }
+
+    @media (max-width: 900px) {
+      .wrapper { padding: 20px 22px 0; }
+    }
+  </style>
+</head>
+
+<body>
+  <a href="/therapist" class="admin-link">Therapist Login</a>
+
+  <div class="wrapper">
+    <div class="brand">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Equinox Logo">
+      <div class="brand-text">
+        <h1>EQUINOX</h1>
+        <p>Balancing minds, one insight at a time</p>
+      </div>
+    </div>
+
+    <div class="login-container">
+      <form action="/dashboard" method="get">
+        <input type="text" name="username" placeholder="Enter Reddit username" required>
+      </form>
+      <div class="label">User Name</div>
+    </div>
+  </div>
+</body>
+</html>
