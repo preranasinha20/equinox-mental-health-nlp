@@ -2,12 +2,20 @@
 from transformers import pipeline
 from collections import defaultdict
 
-# Load model once globally
-emotion_analyzer = pipeline(
-    "text-classification",
-    model="j-hartmann/emotion-english-distilroberta-base",
-    return_all_scores=True
-)
+# Lazy-load the model only when needed
+emotion_analyzer = None
+
+def get_emotion_analyzer():
+    global emotion_analyzer
+
+    if emotion_analyzer is None:
+        emotion_analyzer = pipeline(
+            "text-classification",
+            model="j-hartmann/emotion-english-distilroberta-base",
+            return_all_scores=True,
+        )
+
+    return emotion_analyzer
 
 def analyze_emotions(posts):
     """
@@ -22,7 +30,7 @@ def analyze_emotions(posts):
             continue
 
         # Analyze text (truncate long Reddit posts for performance)
-        result = emotion_analyzer(text[:512])
+        result = get_emotion_analyzer()(text[:512])
 
         # Aggregate emotion scores
         for score_obj in result[0]:
