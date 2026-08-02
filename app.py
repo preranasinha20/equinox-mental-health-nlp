@@ -11,7 +11,7 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 # Local modules
 from ingest import scrape_subreddits, load_cached_df
 from aura import analyze_aura
-from nlp_bert import analyze_emotions, emotion_analyzer  # reuse loaded HF pipeline
+from nlp_bert import analyze_emotions, get_emotion_analyzer  # reuse loaded HF pipeline
 from personality import analyze_big5  # Big Five heuristic
 
 # --- CONFIG ---
@@ -114,7 +114,7 @@ def _analyze_emotion_trend(texts, dates):
         if not t:
             per_post.append({})
             continue
-        res = emotion_analyzer(t[:512])[0]  # list of dicts
+        res = get_emotion_analyzer()(t[:512])[0]  # list of dicts
         scores = {d["label"].lower(): float(d["score"]) for d in res}
         per_post.append(scores)
 
