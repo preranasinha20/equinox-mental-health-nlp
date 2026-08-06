@@ -45,20 +45,48 @@ def preprocess_text(text: str) -> str:
 # --- Fetch Reddit Posts for a Specific User (dashboard + live patient fallback) ---
 def fetch_user_submissions(username, limit=100):
     reddit = init_reddit()
-    ruser = reddit.redditor(username)
-    posts = []
-    for s in ruser.submissions.new(limit=limit):
-        text = (getattr(s, "title", "") or "") + " " + (getattr(s, "selftext", "") or "")
-        clean_text = preprocess_text(text)
-        created_utc = getattr(s, "created_utc", 0) or 0
-        posts.append({
-            "id": getattr(s, "id", ""),
-            "title": getattr(s, "title", "") or "",
-            "created": datetime.utcfromtimestamp(created_utc),
-            "text": clean_text,
-        })
-    user_posts[username] = posts
-    return posts
+
+    try:
+        ruser = reddit.redditor(username)
+
+        posts = []
+
+        for s in ruser.submissions.new(limit=limit):
+            text = (getattr(s, "title", "") or "") + " " + (
+                getattr(s, "selftext", "") or ""
+            )
+
+            posts.append({
+                "id": getattr(s, "id", ""),
+                "title": getattr(s, "title", "") or "",
+                "created": datetime.utcfromtimestamp(
+                    getattr(s, "created_utc", 0)
+                ),
+                "text": preprocess_text(text),
+            })
+
+        # Fallback for demo
+        if len(posts) == 0:
+            df = load_cached_df()
+
+            posts = []
+
+            for _, row in df.head(limit).iterrows():
+                posts.append({
+                    "id": str(_),
+                    "title": row["title"],
+                    "created": pd.to_datetime(row["created_utc"], unit="s"),
+                    "text": preprocess_text(
+                        str(row["title"]) + " " + str(row["text"])
+                    ),
+                })
+
+        user_posts[username] = posts
+        return posts
+
+    except Exception as e:
+        print(e)
+        return []
 
 # --- Sentiment Analysis (VADER) ---
 def analyze_posts(posts):
