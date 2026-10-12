@@ -1,0 +1,45 @@
+name: Equinox CD
+
+on:
+  workflow_run:
+    workflows: ["Equinox CI"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/equinox_deploy
+          chmod 600 ~/.ssh/equinox_deploy
+          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
+
+      - name: Check SSH connection
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+        run: |
+          ssh -i ~/.ssh/equinox_deploy \
+            -o IdentitiesOnly=yes \
+            "$EC2_USER@$EC2_HOST" \
+            'whoami && test -d /home/ubuntu/equinox-mental-health-nlp'
+
+      - name: Report deployment readiness
+        run: echo "SSH connection succeeded. Application deployment has not been performed yet."
