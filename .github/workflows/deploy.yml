@@ -1,3 +1,4 @@
+```yaml
 name: Equinox CD
 
 on:
@@ -11,35 +12,58 @@ permissions:
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: >-
+      ${{
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main'
+      }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-
       - name: Configure SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
         run: |
+          set -eu
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/equinox_deploy
           chmod 600 ~/.ssh/equinox_deploy
           ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
 
-      - name: Check SSH connection
+      - name: Deploy tested commit to EC2
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ secrets.EC2_USER }}
+          DEPLOY_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
+          set -eu
           ssh -i ~/.ssh/equinox_deploy \
             -o IdentitiesOnly=yes \
             "$EC2_USER@$EC2_HOST" \
-            'whoami && test -d /home/ubuntu/equinox-mental-health-nlp'
+            "DEPLOY_SHA='$DEPLOY_SHA' bash -s" <<'REMOTE'
+          set -eu
+          cd /home/ubuntu/equinox-mental-health-nlp
 
-      - name: Report deployment readiness
-        run: echo "SSH connection succeeded. Application deployment has not been performed yet."
+          git fetch origin "$DEPLOY_SHA"
+          git reset --hard "$DEPLOY_SHA"
+
+          sudo systemctl restart equinox
+          sudo systemctl is-active --quiet equinox
+
+          for attempt in $(seq 1 12); do
+            if curl --fail --silent http://127.0.0.1:8000/ >/dev/null; then
+              echo "Deployment successful: $DEPLOY_SHA"
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo "Health check failed after deployment."
+          sudo journalctl -u equinox -n 50 --no-pager
+          exit 1
+          REMOTE
+```
