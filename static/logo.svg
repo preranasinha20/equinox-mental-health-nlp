@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="Equinox four-petal mark">
+<defs>
+ <linearGradient id="peach" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFD99B"/><stop offset="1" stop-color="#F5A5B5"/></linearGradient>
+ <linearGradient id="lavender" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#D8B7FF"/><stop offset="1" stop-color="#A99BF5"/></linearGradient>
+ <linearGradient id="mint" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#D7EFA8"/><stop offset="1" stop-color="#79D6C2"/></linearGradient>
+ <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#B8E6FF"/><stop offset="1" stop-color="#7CB7F1"/></linearGradient>
+</defs>
+<path d="M30.8 30.8C18.5 30.8 7 24.3 7 8.2c15.8 0 23.8 10.6 23.8 22.6Z" fill="url(#peach)"/>
+<path d="M33.2 30.8C33.2 18.5 39.7 7 55.8 7c0 15.8-10.6 23.8-22.6 23.8Z" fill="url(#lavender)"/>
+<path d="M30.8 33.2C18.5 33.2 7 39.7 7 55.8c15.8 0 23.8-10.6 23.8-22.6Z" fill="url(#mint)"/>
+<path d="M33.2 33.2C33.2 45.5 39.7 57 55.8 57c0-15.8-10.6-23.8-22.6-23.8Z" fill="url(#blue)"/>
+</svg>

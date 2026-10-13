@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in · Equinox</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=20261013b">
+</head>
+<body class="login-page">
+  <header class="sitebar login-bar"><a class="wordmark" href="/"><img src="{{ url_for('static', filename='logo.svg') }}" alt=""><span>equinox<span class="wordmark-dot">.</span></span></a><a class="back-link" href="/">← Change role</a></header>
+  <main class="login-layout">
+    <section class="login-aside">
+      <div class="eyebrow"><span class="eyebrow-dot"></span> EQUINOX / {% if role == 'user' %}01{% else %}02{% endif %}</div>
+      <h1>{% if role == 'user' %}Your wellbeing,<br><em>in perspective.</em>{% else %}A clearer view<br><em>for your practice.</em>{% endif %}</h1>
+      <p>{% if role == 'user' %}Sign in to explore the public Reddit profile you want to use for this demo and see the patterns in its posts.{% else %}Enter your practitioner name to open the demo workspace and explore the available public-profile dataset.{% endif %}</p>
+      <div class="aside-note"><span class="aside-note-icon">✳</span><span><strong>Built for reflection</strong><br>Insights are exploratory signals, not clinical conclusions.</span></div>
+    </section>
+    <section class="login-card">
+      <span class="login-card-kicker">{% if role == 'user' %}USER ACCESS{% else %}THERAPIST ACCESS{% endif %}</span>
+      <h2>Welcome back.</h2><p class="login-sub">Enter the demo details to continue.</p>
+      {% if error %}<div class="form-error" role="alert">{{ error }}</div>{% endif %}
+      <form method="post" class="login-form">
+        <label for="identity">{% if role == 'user' %}Reddit username{% else %}Your display name{% endif %}</label>
+        <input id="identity" name="identity" {% if role == 'user' %}placeholder="e.g. mindful_explorer" required{% else %}placeholder="e.g. Dr. Asha Mehta" value="Therapist"{% endif %} autocomplete="username">
+        <label for="password">Demo password</label>
+        <div class="password-wrap"><input id="password" name="password" type="password" placeholder="Enter demo password" required autocomplete="current-password"><button type="button" id="togglePassword" aria-label="Show password">Show</button></div>
+        <button class="primary-btn" type="submit">Continue to {% if role == 'user' %}my dashboard{% else %}therapist workspace{% endif %}<span>↗</span></button>
+      </form>
+      {% if show_demo_credentials %}<div class="demo-credential"><span class="demo-lock">⌑</span><div><strong>Demo access</strong><p>Password for all demo accounts: <code>user123</code></p></div><button type="button" class="copy-pass" id="copyPassword">Copy</button></div>{% endif %}
+      <p class="login-footnote">Prototype access only. This is not production authentication.</p>
+    </section>
+  </main>
+  <script>
+    const pass = document.getElementById('password');
+    document.getElementById('togglePassword').addEventListener('click', function(){const show=pass.type==='password';pass.type=show?'text':'password';this.textContent=show?'Hide':'Show';this.setAttribute('aria-label',show?'Hide password':'Show password');});
+    const copyPassword = document.getElementById('copyPassword');
+    if (copyPassword) copyPassword.addEventListener('click', async function(){try{await navigator.clipboard.writeText('user123');this.textContent='Copied';}catch(e){pass.value='user123';pass.type='text';this.textContent='Shown';}});
+  </script>
+</body>
+</html>

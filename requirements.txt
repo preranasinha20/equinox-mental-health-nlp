@@ -26,5 +26,5 @@ torch==2.2.2
 huggingface-hub==0.23.2
 tokenizers==0.19.1
 
-# --- Optional: prod server (use when deploying on Linux) ---
-# gunicorn==21.2.0
+# --- Production WSGI server (Linux) ---
+gunicorn==23.0.0

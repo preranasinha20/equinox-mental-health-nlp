@@ -1,233 +1,55 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Therapist Dashboard – Equinox</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Poppins -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <!-- Font Awesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
-  <style>
-    :root{
-      --rose:#b99794;     /* background */
-      --teal:#5b7b7a;     /* text / accents */
-      --card:#000;        /* cards */
-      --radius:25px;
-      --shadow: 0 14px 28px rgba(0,0,0,.25), 0 10px 10px rgba(0,0,0,.15);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      background:var(--rose);
-      color:var(--teal);
-      font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-    }
-
-    .wrap{
-      max-width:1200px;
-      margin:0 auto;
-      padding:42px 20px 72px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:28px;
-    }
-
-    /* Header */
-    .hero{
-      text-align:center;
-      width:100%;
-    }
-    .hero h1{
-      margin:0;
-      font-size:clamp(2rem, 5vw, 2.9rem);
-      line-height:1.15;
-      font-weight:800;
-      letter-spacing:.4px;
-      color:var(--teal);
-    }
-
-    /* Search bar */
-    .search-wrap{
-      width:min(920px, 96%);
-      position:relative;
-    }
-    .search{
-      width:100%;
-      padding:18px 120px 18px 22px; /* extra right space for icons */
-      border-radius:40px;
-      border:2px solid #000; /* thin black outline like mock */
-      outline:none;
-      background:#00000010;  /* subtle fill */
-      color:#1f2a2a;
-      font-size:1.05rem;
-      transition: box-shadow .2s ease, border-color .2s ease, background .2s ease;
-    }
-    .search::placeholder{ color:#2b3d3c99; }
-    .search:focus{
-      border-color:#000;
-      background:#00000014;
-      box-shadow:0 0 0 6px rgba(0,0,0,.12);
-    }
-    .icon-tray{
-      position:absolute;
-      right:14px;
-      top:50%;
-      transform:translateY(-50%);
-      display:flex;
-      gap:14px;
-      color:#000;
-    }
-    .icon-btn{
-      width:42px;height:42px;
-      display:grid;place-items:center;
-      border-radius:50%;
-      background:#00000000;
-      border:2px solid #000;
-      cursor:pointer;
-      transition:background .18s ease, transform .1s ease;
-    }
-    .icon-btn:hover{ background:#00000010 }
-    .icon-btn:active{ transform:scale(.96) }
-
-    /* Results card */
-    .card{
-      width:100%;
-      min-height:420px;
-      background:var(--card);
-      color:var(--teal);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:22px 22px 8px;
-    }
-    .card h2{
-      margin:6px 6px 14px;
-      font-size:clamp(1.2rem, 2.4vw, 1.6rem);
-      font-weight:800;
-      color:var(--teal);
-      text-transform:lowercase; /* "user details" in lowercase */
-    }
-
-    /* Result rows (keep your Flask loops) */
-    .results{
-      display:grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap:14px;
-      padding:8px 4px 22px;
-    }
-    .row{
-      background:#0d0d0d;
-      border:1px solid rgba(255,255,255,.05);
-      border-radius:18px;
-      padding:14px 14px 12px;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-    .row a{
-      color:#8fb2b1; text-decoration:none; font-weight:700;
-    }
-    .row a:hover{ text-decoration:underline }
-    .muted{ color:#b6c9c8a8; font-size:.92rem }
-
-    /* Simple responsive tweaks */
-    @media (max-width:720px){
-      .search{ padding:16px 108px 16px 18px; }
-      .icon-btn{ width:38px;height:38px }
-    }
-  </style>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Therapist workspace · Equinox</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=20261013b">
 </head>
-<body>
-  <main class="wrap">
-
-    <!-- Header -->
-    <header class="hero">
-      <h1>Welcome, Therapist!</h1>
-    </header>
-
-    <!-- Search Bar -->
-    <section class="search-wrap">
-      <input
-        id="searchInput"
-        class="search"
-        type="text"
-        placeholder="Search by patient name, username, or keyword…"
-        autocomplete="off" />
-
-      <div class="icon-tray">
-        <!-- sliders / filter icon -->
-        <button class="icon-btn" title="Filters" type="button" id="filterBtn">
-          <i class="fa-solid fa-sliders"></i>
-        </button>
-        <!-- search icon -->
-        <button class="icon-btn" title="Search" type="button" id="searchBtn">
-          <i class="fa-solid fa-magnifying-glass"></i>
-        </button>
+<body class="workspace therapist-workspace">
+  <aside class="sidebar">
+    <a class="wordmark side-wordmark" href="/"><img src="{{ url_for('static', filename='logo.svg') }}" alt=""><span>equinox<span class="wordmark-dot">.</span></span></a>
+    <div class="side-caption">PRACTICE SPACE</div>
+    <nav class="side-nav" aria-label="Therapist navigation"><a class="nav-item active" href="/therapist"><span>⌂</span> Patient explorer</a><a class="nav-item" href="#how-it-works"><span>ⓘ</span> About the data</a></nav>
+    <div class="sidebar-bottom"><div class="profile-mini"><span class="avatar">{{ therapist_name[:1]|upper }}</span><span><strong>{{ therapist_name }}</strong><small>Therapist demo</small></span></div><a class="logout-link" href="/logout">↗ Sign out</a></div>
+  </aside>
+  <main class="workspace-main">
+    <header class="workspace-topbar"><div><span class="breadcrumb">PRACTICE SPACE / PATIENT EXPLORER</span><h1>Welcome, {{ therapist_name }}.</h1><p class="page-intro">Explore the demo dataset with transparent, practical filters.</p></div><div class="topbar-right"><span class="live-pill"><i></i> THERAPIST VIEW</span><span class="avatar avatar-large">{{ therapist_name[:1]|upper }}</span></div></header>
+    <section class="therapist-intro"><div><span class="section-kicker">PATIENT EXPLORER</span><h2>Find a profile to explore.</h2><p>Search public cached authors and narrow the list by posting activity or average text sentiment.</p></div><div class="intro-mark">⌕</div></section>
+    <section class="filter-panel">
+      <div class="filter-panel-heading"><div><h3>Search & filters</h3><p>All filters apply to the current demo dataset.</p></div><button id="resetFilters" class="text-button" type="button">Reset filters ↺</button></div>
+      <div class="filter-controls">
+        <label class="search-field"><span>Search username</span><div class="input-icon"><span>⌕</span><input id="searchInput" type="search" placeholder="Start typing a username…" autocomplete="off"></div></label>
+        <label><span>Sentiment pattern</span><select id="sentimentFilter"><option value="">All sentiment patterns</option><option value="positive">More positive</option><option value="neutral">Mostly neutral</option><option value="negative">More negative</option></select></label>
+        <label><span>Minimum post count</span><select id="minPosts"><option value="1">Any activity (1+)</option><option value="5">5+ posts</option><option value="10">10+ posts</option><option value="25">25+ posts</option><option value="50">50+ posts</option></select></label>
+        <button id="searchBtn" class="primary-btn filter-submit" type="button">Apply filters <span>→</span></button>
       </div>
+      <div class="active-filters" id="activeFilters"><span class="filter-dot"></span> Showing all available profiles</div>
     </section>
-
-    <!-- Results -->
-    <section class="card">
-      <h2>user details</h2>
-
-      <!-- This grid hosts dynamic results from Flask -->
-      <div id="resultGrid" class="results">
-        {# Example: show initial users if provided by backend #}
-        {% if users %}
-          {% for u in users %}
-            <div class="row">
-              <a href="/patient/{{ u.author|e }}">{{ u.author }}</a>
-              <div class="muted">
-                Posts: {{ u.post_count }}{% if u.dominant_emotion %} • Dominant: {{ u.dominant_emotion }}{% endif %}
-              </div>
-            </div>
-          {% endfor %}
-        {% else %}
-          <div class="row muted">Start typing above to search patients…</div>
-        {% endif %}
-      </div>
-    </section>
+    <section class="results-section"><div class="results-heading"><div><span class="section-kicker">AVAILABLE PROFILES</span><h2>Profiles in your dataset</h2></div><span class="result-count" id="resultCount">Loading…</span></div><div id="resultGrid" class="patient-grid"><div class="empty-state">Loading the available dataset…</div></div></section>
+    <section class="notice" id="how-it-works"><span>ⓘ</span><p><strong>How these filters work</strong> Sentiment is calculated from cached post text using VADER and grouped into positive, neutral, or negative bands. Post count reflects available cached records. These are exploratory language signals only — not diagnoses, risk scores, or substitutes for clinical judgment.</p></section>
+    <footer class="workspace-footer"><span>equinox. <i>Patterns, not diagnoses.</i></span><span>Therapist demo workspace</span></footer>
   </main>
-
-  <!-- Optional lightweight front-end behavior: call your existing therapist search API -->
-  <script>
-    const input = document.getElementById('searchInput');
-    const btn   = document.getElementById('searchBtn');
-    const grid  = document.getElementById('resultGrid');
-
-    async function runSearch(){
-      const q = input.value.trim();
-      const url = `/api/therapist/search?name=${encodeURIComponent(q)}&emotion=`; // keeps your existing API signature
-      try{
-        const res = await fetch(url);
-        const data = await res.json();
-        const list = data?.patients || [];
-        grid.innerHTML = list.length
-          ? list.map(p => `
-              <div class="row">
-                <a href="/patient/${encodeURIComponent(p.author)}">${p.author}</a>
-                <div class="muted">Posts: ${p.post_count ?? '-'}${p.dominant_emotion ? ' • Dominant: '+p.dominant_emotion : ''}</div>
-              </div>
-            `).join('')
-          : '<div class="row muted">No matches. Try another name or keyword.</div>';
-      }catch(e){
-        grid.innerHTML = '<div class="row muted">Error fetching results. Please try again.</div>';
-      }
-    }
-
-    btn.addEventListener('click', runSearch);
-    input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') runSearch(); });
-
-    // Optional filter button placeholder
-    document.getElementById('filterBtn').addEventListener('click', ()=>{
-      alert('Filters coming soon. (You can wire this to your emotion filter UI)');
-    });
-  </script>
+<script>
+  const input=document.getElementById('searchInput'), sentiment=document.getElementById('sentimentFilter'), minPosts=document.getElementById('minPosts'), grid=document.getElementById('resultGrid');
+  let debounce;
+  function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function refreshActive(){const bits=[];if(input.value.trim())bits.push('Username: '+input.value.trim());if(sentiment.value)bits.push('Sentiment: '+sentiment.options[sentiment.selectedIndex].text);if(minPosts.value!=='1')bits.push(minPosts.value+'+ posts');document.getElementById('activeFilters').innerHTML='<span class="filter-dot"></span> '+(bits.length?'Filters: '+bits.map(esc).join(' · '):'Showing all available profiles');}
+  async function runSearch(){
+    grid.innerHTML='<div class="empty-state">Updating profiles…</div>';
+    const params=new URLSearchParams({name:input.value.trim(),sentiment:sentiment.value,min_posts:minPosts.value});
+    try{
+      const response=await fetch('/api/therapist/search?'+params.toString());const data=await response.json();const patients=data.patients||[];
+      document.getElementById('resultCount').textContent=(data.count??patients.length)+' profiles';
+      grid.innerHTML=patients.length?patients.map(p=>'<article class="patient-card"><div class="patient-card-top"><span class="patient-avatar">'+esc((p.author||'?').slice(0,1).toUpperCase())+'</span><span class="sentiment-chip sentiment-'+esc(p.dominant_emotion)+'">'+esc(p.dominant_emotion||'unknown')+'</span></div><h3>'+esc(p.author)+'</h3><p class="patient-card-sub">Cached public profile</p><div class="patient-metrics"><div><span>POSTS</span><strong>'+esc(p.post_count)+'</strong></div><div><span>SENTIMENT</span><strong>'+Number(p.sentiment_score||0).toFixed(2)+'</strong></div></div><a class="card-link" href="/patient/'+encodeURIComponent(p.author)+'">Explore insights <span>↗</span></a></article>').join(''):'<div class="empty-state"><strong>No profiles match these filters.</strong><span>Try a broader search, lower the post minimum, or reset the sentiment filter.</span></div>';
+      refreshActive();
+    }catch(e){grid.innerHTML='<div class="empty-state">Could not load the dataset. Check that the app and cached data are available.</div>';document.getElementById('resultCount').textContent='Unavailable';}
+  }
+  input.addEventListener('input',()=>{clearTimeout(debounce);debounce=setTimeout(runSearch,250);});
+  document.getElementById('searchBtn').addEventListener('click',runSearch);
+  sentiment.addEventListener('change',runSearch);minPosts.addEventListener('change',runSearch);
+  document.getElementById('resetFilters').addEventListener('click',()=>{input.value='';sentiment.value='';minPosts.value='1';runSearch();});
+  input.addEventListener('keydown',e=>{if(e.key==='Enter')runSearch();});
+  runSearch();
+</script>
 </body>
 </html>
